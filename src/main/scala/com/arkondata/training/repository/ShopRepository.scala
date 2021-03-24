@@ -10,7 +10,7 @@ import io.chrisdavenport.log4cats.Logger
 trait ShopRepository[F[_]] {
   def fetchAll(limit: Int = 50,
                offset: Int = 0): F[List[Shop]]
-
+  def fetchById(id: Int): F[Option[Shop]]
 }
 
 
@@ -55,5 +55,9 @@ object ShopRepository{
             .compile
             .toList
             .transact(xa)
+
+      def fetchById(id: Int): F[Option[Shop]]=
+        Logger[F].info(s"ShopRepository.fetchAll") *>
+          (select ++ sql"WHERE s.id = $id").query[Shop].option.transact(xa)
     }
 }

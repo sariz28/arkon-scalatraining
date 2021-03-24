@@ -9,7 +9,7 @@ object QueryType {
 
   val limitArg: Argument[Int] = Argument("limit", OptionInputType(IntType), defaultValue = 50)
   val offsetArg: Argument[Int] = Argument("offset", OptionInputType(IntType), defaultValue = 0)
-  
+  val idArg: Argument[Int] = Argument("id", IntType)
 
   def apply[F[_]: Effect]: ObjectType[ShopRepository[F], Unit] =
     ObjectType(
@@ -22,7 +22,13 @@ object QueryType {
           arguments   = limitArg :: offsetArg :: Nil,
           resolve     = c =>  c.ctx.fetchAll(c.arg(limitArg), c.arg(offsetArg)).toIO.unsafeToFuture
         ),
-
+        Field(
+          name        = "shop",
+          fieldType   = OptionType(ShopType[F]),
+          description = Some("Returns a Shop by id."),
+          arguments   = idArg:: Nil,
+          resolve     = c =>  c.ctx.fetchById(c.arg(idArg)).toIO.unsafeToFuture
+        ),
 
       )
     )
