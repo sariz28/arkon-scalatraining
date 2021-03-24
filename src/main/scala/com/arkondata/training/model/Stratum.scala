@@ -1,6 +1,6 @@
 package com.arkondata.training.model
 
 case class Stratum(
-                    id: Int,
-                    name: String
+                    id: Option[Int],
+                    name: Option[String]
                   )
