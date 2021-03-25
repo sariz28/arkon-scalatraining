@@ -1,13 +1,17 @@
 package com.arkondata.training.schema
 
-import cats.effect.Effect
+import cats.effect._
+import cats.effect.implicits._
 import com.arkondata.training.model.Shop
-import com.arkondata.training.repository.ShopRepository
+import com.arkondata.training.repository.MasterRepository
 import sangria.schema._
 
 object ShopType {
 
-  def apply[F[_]: Effect]: ObjectType[ShopRepository[F], Shop] =
+  val limitArg: Argument[Int] = Argument("limit", OptionInputType(IntType), defaultValue = 5)
+  val radiusArg: Argument[Int] = Argument("radius", OptionInputType(IntType), defaultValue = 50)
+
+  def apply[F[_]: Effect]: ObjectType[MasterRepository[F], Shop] =
     ObjectType(
       name     = "ShopType",
       fieldsFn = () => fields(
@@ -32,15 +36,21 @@ object ShopType {
 
         Field(
           name        = "activity",
-          fieldType   = OptionType(ActivityType.ActivityType),
-          description = Some("comercial activity"),
-          resolve     = _.value.activity()),
+          fieldType   = OptionType(ActivityType[F]),
+          description = Some("activity"),
+          resolve     = e => e.ctx.activityRepo.fetchById(e.value.activityId).toIO.unsafeToFuture),
 
         Field(
           name        = "stratum",
-          fieldType   = OptionType(StratumType.StratumType),
+          fieldType   = OptionType(StratumType[F]),
           description = Some("stratum"),
-          resolve     = _.value.stratum()),
+          resolve     = e => e.ctx.stratumRepo.fetchById(e.value.stratumId).toIO.unsafeToFuture),
+
+        Field(
+          name        = "shopType",
+          fieldType   = OptionType(ShopTypeType[F]),
+          description = Some("shop type"),
+          resolve     = e => e.ctx.shopTypeRepo.fetchById(e.value.shopTypeId).toIO.unsafeToFuture),
 
         Field(
           name        = "address",
@@ -67,22 +77,36 @@ object ShopType {
           resolve     = _.value.website),
 
         Field(
-          name        = "shopType",
-          fieldType   = OptionType(ShopTypeType.ShopTypeType),
-          description = Some("shopType"),
-          resolve     = _.value.shopType()),
-
-        Field(
           name        = "lat",
-          fieldType   = FloatType,
+          fieldType   = BigDecimalType,
           description = Some("latitude"),
-          resolve     = _.value.lat.toDouble),
+          resolve     = _.value.lat),
 
         Field(
           name        = "long",
-          fieldType   = FloatType,
+          fieldType   = BigDecimalType,
           description = Some("longitude"),
-          resolve     = _.value.long.toDouble),
+          resolve     = _.value.long),
+
+        Field(
+          name        = "nearbyShops",
+          fieldType   = ListType(ShopType[F]),
+          description = Some("near shops"),
+          arguments   = limitArg :: Nil,
+          resolve     = e => e.ctx.shopRepo.fetchNearbyShops(e.arg(limitArg),
+                                                             e.value.lat,
+                                                             e.value.long,
+                                                             e.value.id).toIO.unsafeToFuture),
+
+        Field(
+          name        = "shopsInRadius",
+          fieldType   = ListType(ShopType[F]),
+          description = Some("shops in radius"),
+          arguments   = radiusArg :: Nil,
+          resolve     = e => e.ctx.shopRepo.fetchShopsInRadius(e.arg(radiusArg),
+                                                                  e.value.lat,
+                                                                  e.value.long,
+                                                                  e.value.id).toIO.unsafeToFuture),
       )
     )
 }

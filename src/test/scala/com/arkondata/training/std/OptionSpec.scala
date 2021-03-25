@@ -1,6 +1,6 @@
-package training.std
+package com.arkondata.training.std
 
-import training.BaseSpec
+import com.arkondata.training.BaseSpec
 
 class OptionSpec extends BaseSpec {
   "Option" should "behave" in {

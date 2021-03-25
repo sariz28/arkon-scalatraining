@@ -1,5 +1,7 @@
 package com.arkondata.training.model
 
+import sangria.schema.BigDecimalType
+
 case class Shop(id: Int,
                 name: String,
                 businessName: Option[String],
@@ -7,22 +9,9 @@ case class Shop(id: Int,
                 phoneNumber: Option[String],
                 email: Option[String],
                 website: Option[String],
-                lat: Float,
-                long: Float,
+                lat: BigDecimal,
+                long: BigDecimal,
                 activityId: Option[Int],
-                activityName: Option[String],
                 stratumId: Option[Int],
-                stratumName: Option[String],
                 shopTypeId: Option[Int],
-                shopTypeName: Option[String]
-               ){
-
-  def activity(): Activity = Activity(activityId, activityName)
-
-  def stratum(): Stratum = Stratum(stratumId, stratumName)
-
-  def shopType(): ShopType = ShopType(shopTypeId, shopTypeName)
-}
-
-
-
+               )

@@ -1,12 +1,12 @@
 package com.arkondata.training
 
-import com.arkondata.training.grahql.{GraphQL, GraphQLProvider, GraphQLRoutes}
-import com.arkondata.training.repository.{PostgresConnection, ShopRepository}
+import com.arkondata.training.grahql._
+import com.arkondata.training.repository.{MasterRepository, PostgresConnection}
 import com.arkondata.training.schema.QueryType
 import cats.effect._
 import cats.implicits._
 import doobie._
-import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.{Logger, SelfAwareStructuredLogger}
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import _root_.sangria.schema._
 import org.http4s._
@@ -30,7 +30,7 @@ object Main extends IOApp {
       Schema(
         query    = QueryType[F]
       ),
-      ShopRepository.fromTransactor(transactor).pure[F],
+      MasterRepository[F](transactor).pure[F],
       blockingContext
     )
 
@@ -57,7 +57,7 @@ object Main extends IOApp {
 
   // Our entry point starts the server and blocks forever.
   def run(args: List[String]): IO[ExitCode] = {
-    implicit val log = Slf4jLogger.getLogger[IO]
+    implicit val log: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
     resource[IO].use(_ => IO.never.as(ExitCode.Success))
   }
 

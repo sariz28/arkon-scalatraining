@@ -2,7 +2,6 @@ package com.arkondata.training.grahql
 
 import _root_.sangria.ast._
 import _root_.sangria.execution._
-import _root_.sangria.execution.deferred._
 import _root_.sangria.execution.WithViolations
 import _root_.sangria.marshalling.circe._
 import _root_.sangria.parser.{ QueryParser, SyntaxError }
