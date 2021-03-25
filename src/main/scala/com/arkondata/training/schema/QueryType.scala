@@ -30,7 +30,7 @@ object QueryType {
           name        = "nearbyShops",
           fieldType   = ListType(ShopType[F]),
           description = Some("near shops"),
-          arguments   = radiusArg ::  latArg::  longArg :: Nil,
+          arguments   = limitArg ::  latArg::  longArg :: Nil,
             resolve     = e => e.ctx.shopRepo.fetchNearbyShops(e.arg(limitArg),
             e.arg(latArg),
             e.arg(longArg)).toIO.unsafeToFuture
